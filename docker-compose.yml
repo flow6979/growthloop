@@ -1,0 +1,10 @@
+# Own server / VM: `docker compose up -d`. Put HTTPS + auth in front before exposing it to the internet.
+services:
+  growthloop:
+    build: .
+    env_file: .env
+    ports: ["127.0.0.1:8600:8600"]
+    volumes: ["./data:/data"]
+    restart: unless-stopped
+  # Optional self-hosted Langfuse: see https://langfuse.com/self-hosting (docker compose from their repo),
+  # then set LANGFUSE_HOST / keys in .env.

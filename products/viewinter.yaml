@@ -1,0 +1,63 @@
+# Product Adapter: everything GrowthLoop needs to know about one product. The core never imports product code.
+id: viewinter
+name: Viewinter
+url: https://flow6979.github.io/viewinter/
+repo: https://github.com/flow6979/viewinter
+local_path: ../viewinter
+
+# One paragraph only. This is ALL the Dreamer agent sees (on purpose).
+one_liner: >
+  Viewinter is a free interview-prep website for software engineers (mostly Indian, Hinglish + English):
+  system design (HLD), LLD/design patterns, Java, databases, CS fundamentals, behavioral, DSA practice and
+  agentic-AI engineering, with progress tracking, notes, quizzes and AI mock interviews (Gemini).
+
+# Full context for every other agent.
+context: |
+  - 343 markdown articles: 23 HLD topics, 26 HLD questions, LLD patterns + 8 machine-coding problems, Java,
+    databases, CS, behavioral, RAG, DSA, agentic AI (LangGraph etc.). Hinglish and English versions.
+  - Features: personal study plan, checklist progress, notes, Ask-AI side panel, AI mock interview room
+    (voice + whiteboard), quiz bank, company-wise prep, resume practice, shareable topic lists,
+    in-browser Python agent labs (Pyodide).
+  - Stack: React SPA (Vite) on GitHub Pages under flow6979.github.io/viewinter, Firebase Auth + Firestore,
+    no backend. AI features need the USER's own Gemini API key (BYO key).
+  - Known gaps (from code review, to be validated): client-side rendered SPA with empty <div id="root">,
+    one <title> for all pages, no meta description, no sitemap, no Open Graph previews; login only syncs data;
+    no daily hook (streak / daily question / reminder); DAU not measured (only anonymous visit counters).
+  - Competitors: Exponent ($149/yr), Hello Interview ($79/yr), Codemia (free), designinterviews.in (free),
+    YouTube creators, Topmate mentors.
+
+north_star:
+  metric: dau
+  definition: >
+    Engaged DAU: unique browser or account that did a meaningful action that day
+    (read >30s, quiz answer, mock interview, note, plan update).
+  ladder: [10, 100, 1000]
+
+guardrail_metrics: [d7_retention, signups, error_rate]
+
+build:
+  workdir: web
+  commands: ["npm ci", "npm run typecheck", "npm run build"]
+
+deploy:
+  kind: github-pages      # github-pages | vercel | netlify | cloudrun | manual
+  free_options: [vercel, netlify, cloudflare-pages]
+
+metrics:
+  adapter: firestore      # firestore | manual
+  firebase_project: viewinter-30735
+  # Daily docs written by web/src/traffic.ts. `engaged` is added by the first instrumentation experiment.
+  collection: traffic
+  dau_field: engaged
+  dau_fallback_field: visitors
+
+channels_supported: [linkedin, youtube, x, whatsapp, instagram, reddit, college-groups, telegram, discord, email, blog]
+
+protected_paths: [web/firestore.rules, web/src/firebase.ts, .github/workflows/]
+
+budget_hint:
+  hosted_ai:
+    # Used by the "hosted AI allowance" feasibility card in the UI.
+    model: gemini-flash-lite-latest
+    tokens_per_mock_interview: 30000
+    tokens_per_ask: 3000
