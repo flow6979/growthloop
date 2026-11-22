@@ -485,7 +485,11 @@ DIST = ROOT / "frontend" / "dist"
 if DIST.exists():
     app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
+    DIST_REAL = DIST.resolve()
+
     @app.get("/{path:path}")
     def spa(path: str):
-        f = DIST / path
-        return FileResponse(f if path and f.is_file() else DIST / "index.html")
+        f = (DIST_REAL / path.lstrip("/")).resolve()
+        if path and f.is_file() and f.is_relative_to(DIST_REAL):  # never serve files outside dist/
+            return FileResponse(f)
+        return FileResponse(DIST_REAL / "index.html")
