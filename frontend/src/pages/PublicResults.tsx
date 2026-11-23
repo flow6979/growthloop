@@ -27,8 +27,8 @@ function Body({ d }: { d: PR }) {
   return (
     <>
       <header className="public-head">
-        <div className="eyebrow">Building in public</div>
-        <h1>{d.product}: road to {g.ladder[g.ladder.length - 1]?.toLocaleString()} daily users</h1>
+        <div className="eyebrow-pill"><span className="dot">↗</span>Building in public</div>
+        <h1>{d.product}: the road to <span className="hl">{g.ladder[g.ladder.length - 1]?.toLocaleString()} daily users</span>.</h1>
         <p className="muted">
           An AI team proposes, debates and runs growth experiments; every result, good or bad, lands here.
         </p>
@@ -41,7 +41,7 @@ function Body({ d }: { d: PR }) {
         <div><div className="big">{finished.length ? `${won}/${finished.length}` : "—"}</div><div className="muted small">experiments won</div></div>
       </section>
 
-      <section className="card"><div className="card-body">
+      <section className="card hero"><div className="card-body">
         <div className="row between small" style={{ marginBottom: 6 }}>
           {g.ladder.map((rung) => (
             <span key={rung} className={(g.current_7d ?? 0) >= rung ? "pos" : "muted"}>{(g.current_7d ?? 0) >= rung ? "✓ " : ""}{rung.toLocaleString()} DAU</span>

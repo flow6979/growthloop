@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api, type Cycle, type Experiment, type MetricsResponse, type Recommendation } from "../api";
 import { errMsg, fmtAgo, fmtNum, fmtPct, fmtUsd, todayIso, useAsync } from "../lib";
-import { Badge, Card, Empty, ErrorBox, Field, Loading, PageHeader, Progress, Stat, useStatus } from "../components/ui";
+import { Badge, Card, Empty, ErrorBox, Field, Loading, Progress, Stat, useStatus } from "../components/ui";
 import { LineChart } from "../components/charts";
 
 const LIVE_STATUSES = new Set(["live"]);
+const ROLES = ["CEO", "Dreamer", "Maverick", "Skeptic", "Researcher", "Product", "CTO", "Developer", "QA", "Growth analyst",
+  "Marketing", "Sales", "Finance", "HR", "Trust & Safety", "Judge"];
 
 export default function Overview() {
   const { status } = useStatus();
@@ -24,52 +26,82 @@ export default function Overview() {
 
   return (
     <div className="page">
-      <PageHeader title="Overview" sub={status?.product.one_liner ?? undefined} />
       {metrics.error && !metrics.data ? <ErrorBox error={metrics.error} onRetry={metrics.reload} /> : null}
 
-      <div className="grid-overview">
-        <Card title="Goal" className="goal-card">
-          {!goal ? <Loading /> : (
-            <div className="stack">
-              <div className="goal-big">
-                <span className="goal-cur">{goal.current_7d === null ? "—" : fmtNum(goal.current_7d)}</span>
-                <span className="muted"> / {goal.target} {goal.metric.toUpperCase()}</span>
-              </div>
-              <div className="muted small">7-day average · today {fmtNum(goal.today)} · prev 7d {fmtNum(goal.prev_7d)}
-                {goal.current_7d !== null && goal.prev_7d ? (
-                  <> · <span className={goal.current_7d >= goal.prev_7d ? "pos" : "neg"}>
-                    {fmtPct(((goal.current_7d - goal.prev_7d) / goal.prev_7d) * 100)}
-                  </span></>
-                ) : null}
-              </div>
-              <Progress value={goal.current_7d ?? 0} max={goal.target} />
-              <div className="ladder">
-                {goal.ladder.map((rung) => {
-                  const reached = (goal.current_7d ?? 0) >= rung || goal.milestones_reached.includes(rung);
-                  return (
-                    <div key={rung} className={`rung ${reached ? "reached" : rung === goal.target ? "next" : ""}`}>
-                      <span className="rung-check">{reached ? "✓" : rung === goal.target ? "→" : "·"}</span>
-                      {rung.toLocaleString()} DAU
-                    </div>
-                  );
-                })}
-              </div>
-              {goal.definition && <div className="muted tiny">{goal.definition}</div>}
-            </div>
-          )}
-        </Card>
-
-        <div className="stat-grid">
-          <Stat label="Live experiments" value={exps.data ? live : "…"} sub={<Link to="/experiments">View board →</Link>} />
-          <Stat label="Pending inbox" value={status ? status.pending_inbox : "…"} tone={status?.pending_inbox ? "amber" : undefined}
-            sub={<Link to="/inbox">Open inbox →</Link>} />
-          <Stat label="Open recommendations" value={recs.data ? openRecs : "…"} sub={<Link to="/recommendations">Review →</Link>} />
-          <Stat label="LLM cost (24h)" value={fmtUsd(spend, 2)} tone={budget > 0 && spend >= budget ? "red" : undefined}
-            sub={<>
-              <Progress value={spend} max={budget || 1} tone={budget > 0 && spend >= budget ? "red" : undefined} />
-              <span className="muted">{budget > 0 ? `of ${fmtUsd(budget, 2)} budget` : "free tier (no budget)"}</span>
-            </>} />
+      <section className="hero-grid">
+        <div>
+          <div className="eyebrow-pill"><span className="dot">↗</span>{status?.product.name ?? "Your product"} · {status?.loop_running ? "loop running" : "loop paused"}</div>
+          <h1 className="hero-title">
+            From {goal?.current_7d == null ? "zero" : fmtNum(goal.current_7d)} to{" "}
+            <span className="hl">{goal ? goal.target.toLocaleString() : "…"} engaged users</span>.
+          </h1>
+          <p className="hero-sub">
+            A company of AI agents ideates, argues, builds and measures growth bets for {status?.product.name ?? "your product"},
+            day and night. You approve anything risky.
+          </p>
+          <div className="hero-actions">
+            <Link className="btn btn-primary" to="/inbox">
+              Open inbox{status?.pending_inbox ? ` (${status.pending_inbox})` : ""} →
+            </Link>
+            <Link className="btn" to={lastMemo ? `/boardroom/${lastMemo.id}` : "/boardroom"}>See the boardroom</Link>
+          </div>
         </div>
+
+        <div className="hero-card-wrap">
+          <div className="hero-card">
+            <span className="hero-tag">Live goal ↗</span>
+            {!goal ? <Loading /> : (
+              <>
+                <div>
+                  <div className="label">{goal.metric.toUpperCase()} · 7-day average</div>
+                  <div className="goal-big">
+                    <span className="goal-cur">{goal.current_7d === null ? "—" : fmtNum(goal.current_7d)}</span>
+                    <span className="muted"> / {goal.target}</span>
+                    {goal.current_7d !== null && goal.prev_7d ? (
+                      <span className={`small ${goal.current_7d >= goal.prev_7d ? "pos" : "neg"}`} style={{ marginLeft: 8 }}>
+                        {fmtPct(((goal.current_7d - goal.prev_7d) / goal.prev_7d) * 100)} vs last week
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="hero-row"><span>Today</span><strong>{fmtNum(goal.today)}</strong></div>
+                <div className="hero-row"><span>Previous 7 days</span><strong>{fmtNum(goal.prev_7d)}</strong></div>
+                <Progress value={goal.current_7d ?? 0} max={goal.target} />
+                <div className="ladder">
+                  {goal.ladder.map((rung) => {
+                    const reached = (goal.current_7d ?? 0) >= rung || goal.milestones_reached.includes(rung);
+                    return (
+                      <div key={rung} className={`rung ${reached ? "reached" : rung === goal.target ? "next" : ""}`}>
+                        <span className="rung-check">{reached ? "✓" : rung === goal.target ? "→" : "·"}</span>
+                        {rung.toLocaleString()} DAU
+                      </div>
+                    );
+                  })}
+                </div>
+                {goal.definition && <div className="muted tiny">{goal.definition}</div>}
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div className="marquee" aria-hidden>
+        <div className="marquee-track">
+          {[0, 1].map((k) => ROLES.map((r) => (
+            <span key={`${k}-${r}`} className="row"><span>{r}</span><span className="sep">✦</span></span>
+          )))}
+        </div>
+      </div>
+
+      <div className="stat-grid stat-grid-4">
+        <Stat label="Live experiments" value={exps.data ? live : "…"} sub={<Link to="/experiments">View board →</Link>} />
+        <Stat label="Waiting on you" value={status ? status.pending_inbox : "…"} tone={status?.pending_inbox ? "amber" : undefined}
+          sub={<Link to="/inbox">Open inbox →</Link>} />
+        <Stat label="Recommendations" value={recs.data ? openRecs : "…"} sub={<Link to="/recommendations">Review →</Link>} />
+        <Stat label="LLM cost (24h)" value={fmtUsd(spend, 2)} tone={budget > 0 && spend >= budget ? "red" : undefined}
+          sub={<>
+            <span className="muted">{budget > 0 ? `of ${fmtUsd(budget, 2)} budget` : "free tier, no budget"}</span>
+          </>} />
       </div>
 
       <Card title={`${(goal?.metric ?? "dau").toUpperCase()} (last 90 days)`}
@@ -88,7 +120,7 @@ export default function Overview() {
         )}
       </Card>
 
-      <Card title="Latest cycle memo" actions={lastMemo && <Link to={`/boardroom/${lastMemo.id}`} className="btn btn-sm">Open in Boardroom</Link>}>
+      <Card className="tint-sage" title="Latest cycle memo" actions={lastMemo && <Link to={`/boardroom/${lastMemo.id}`} className="btn btn-sm">Open in Boardroom</Link>}>
         {!cycles.data ? (cycles.error ? <ErrorBox error={cycles.error} onRetry={cycles.reload} /> : <Loading />) : !lastMemo ? (
           <Empty title="No cycle memo yet">Run a weekly cycle from the top bar. The CEO writes a memo explaining its bets.</Empty>
         ) : (

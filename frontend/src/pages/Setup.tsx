@@ -59,7 +59,7 @@ export default function Setup() {
     <div className="wizard">
       <div className="wizard-head">
         <div>
-          <h1>Set up your AI company</h1>
+          <h1>Set up your <span className="hl">AI company</span>.</h1>
           <p className="muted">
             {status?.onboarded
               ? "You already finished setup. Changing anything here re-saves it (Settings has the same options)."

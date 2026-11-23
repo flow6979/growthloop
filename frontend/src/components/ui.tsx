@@ -23,12 +23,20 @@ export function PageHeader({ title, sub, actions }: { title: string; sub?: React
   return (
     <div className="page-header">
       <div>
-        <h1>{title}</h1>
+        <h1>{headline(title)}</h1>
         {sub && <p className="muted">{sub}</p>}
       </div>
       {actions && <div className="row gap">{actions}</div>}
     </div>
   );
+}
+
+/** Big ink heading with the last word under a lime highlighter, plus a full stop. */
+export function headline(title: string) {
+  const i = title.lastIndexOf(" ");
+  const head = i < 0 ? "" : title.slice(0, i + 1);
+  const last = i < 0 ? title : title.slice(i + 1);
+  return <>{head}<span className="hl">{last}</span>.</>;
 }
 
 export function Card({ title, actions, children, className = "", pad = true }: {

@@ -65,7 +65,7 @@ function CycleView({ id }: { id: string }) {
         {cycle.summary?.notes?.length ? <ul className="small muted">{cycle.summary.notes.map((n, i) => <li key={i}>{n}</li>)}</ul> : null}
       </Card>
 
-      <Card title="CEO memo">
+      <Card className="tint-lilac" title="CEO memo">
         {cycle.memo ? <div className="prose">{cycle.memo}</div> : <div className="muted">No memo yet (written after the CEO decides).</div>}
       </Card>
 

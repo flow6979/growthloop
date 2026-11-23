@@ -72,14 +72,14 @@ export function Sidebar({ pending, onClose }: { pending: number; onClose: () => 
     <aside className="sidebar">
       <div className="brand">
         <div className="brand-mark">
-          <svg viewBox="0 0 32 32" width="22" height="22">
-            <rect width="32" height="32" rx="7" fill="var(--accent)" />
-            <path d="M8 21l5-6 4 3 7-9" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <rect width="32" height="32" rx="8" fill="#1c1e2c" />
+            <path d="M8 21l5-6 4 3 7-9" stroke="#d6ec7e" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
-          <div className="brand-name">GrowthLoop</div>
-          <div className="brand-sub">Mission Control</div>
+          <div className="brand-name">Growth<b>Loop</b></div>
+          <div className="brand-sub">AI growth company</div>
         </div>
         <button className="btn btn-ghost btn-sm nav-close" onClick={onClose} aria-label="Close menu">✕</button>
       </div>
@@ -103,6 +103,7 @@ export function Sidebar({ pending, onClose }: { pending: number; onClose: () => 
           </a>
         </div>
       </nav>
+      <div className="sidebar-foot">Agents propose. You approve anything risky.</div>
     </aside>
   );
 }
