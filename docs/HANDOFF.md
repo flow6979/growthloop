@@ -135,6 +135,6 @@ Commits (oldest first):
 
 ## 8. Where things are
 
-- GrowthLoop repo: https://github.com/flow6979/growthloop (private). Local copy at `~/projects/growthloop`.
+- GrowthLoop repo: https://github.com/flow6979/growthloop (public). Local copy at `~/projects/growthloop`.
 - Product repo: https://github.com/flow6979/viewinter. Local copy at `~/projects/viewinter`, referenced as `../viewinter` in `products/viewinter.yaml`.
 - Adding another product: copy `products/viewinter.yaml` and set `active_product` in Settings.
